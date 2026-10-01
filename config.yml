@@ -1,0 +1,7 @@
+# Legacy setting name retained for compatibility; this now controls ONLY team chat.
+# true: /teammsg and /tm broadcast to ALL online players.
+# false: team messages go only to the team.
+# /w, /msg, /tell and /bmsg are ALWAYS private, regardless of this setting.
+broadcast-private-messages: true
+# Show a brief notice on login when team commands are public.
+public-message-notice: true

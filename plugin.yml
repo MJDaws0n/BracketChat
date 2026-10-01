@@ -1,0 +1,39 @@
+name: BracketChat
+version: 1.0.2
+main: net.mjdawson.bracketchat.BracketChat
+api-version: '26.2'
+description: Bracket-formatted system chat and replacement messaging commands.
+author: MJDawson
+commands:
+  global:
+    aliases: [g]
+    description: Send a global bracket-formatted message.
+    usage: /global <message>
+  bsay:
+    aliases: [say]
+    description: Bracket-formatted announcement (operator by default).
+    usage: /bsay <message>
+  bmsg:
+    aliases: [w, msg, tell]
+    description: Privately message the selected player, with a copy to the sender.
+    usage: /bmsg <player> <message>
+  bme:
+    aliases: [me]
+    description: Send a bracket-formatted action.
+    usage: /bme <action>
+  bteammsg:
+    aliases: [teammsg, tm]
+    description: Team message; PUBLIC by default on this server.
+    usage: /bteammsg <message>
+permissions:
+  bracketchat.chat:
+    default: true
+    description: Use normal chat and /global.
+  bracketchat.whisper:
+    default: true
+  bracketchat.me:
+    default: true
+  bracketchat.team:
+    default: true
+  bracketchat.say:
+    default: op

@@ -1,0 +1,68 @@
+name: Publish releases and Maven packages
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish
+        type: choice
+        required: true
+        default: all
+        options: [all, 1.0.0, 1.0.1, 1.0.2]
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: publish-bracketchat
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+      - name: Publish original version artifacts
+        env:
+          SELECTED_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          versions=("$SELECTED_VERSION")
+          if [[ "$SELECTED_VERSION" == all ]]; then versions=(1.0.0 1.0.1 1.0.2); fi
+          registry="https://maven.pkg.github.com/${GITHUB_REPOSITORY,,}"
+          for version in "${versions[@]}"; do
+            folder="releases/$version"
+            (cd "$folder" && sha256sum --check SHA256SUMS)
+            if ! gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              latest=false
+              if [[ "$version" == 1.0.2 ]]; then latest=true; fi
+              gh release create "v$version" \
+                "$folder/BracketChat-$version.jar" \
+                "$folder/BracketChat-$version-source.zip" \
+                "$folder/SHA256SUMS" \
+                --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+                --title "BracketChat $version" --notes-file "$folder/NOTES.md" \
+                --latest="$latest"
+            fi
+            status=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+              --user "$GITHUB_ACTOR:$GITHUB_TOKEN" \
+              "$registry/net/mjdawson/bracket-chat/$version/bracket-chat-$version.pom")
+            if [[ "$status" == 200 ]]; then
+              echo "Package $version already exists; skipping."
+            elif [[ "$status" == 404 ]]; then
+              mvn --batch-mode --no-transfer-progress \
+                org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy-file \
+                "-DrepositoryId=github" "-Durl=$registry" \
+                "-Dfile=$folder/BracketChat-$version.jar" "-DpomFile=$folder/pom.xml"
+            else
+              echo "Package lookup failed (HTTP $status); refusing to treat this as a missing version." >&2
+              exit 1
+            fi
+          done

@@ -1,0 +1,24 @@
+BracketChat 1.0.2 — 2026-10-01
+
+COMPILE: PASS
+JDK: Azul Zulu OpenJDK 25.0.2, javac --release 25
+API: actual Paper API 26.2.build.129-stable (provided)
+Packaged using JDK jar; includes plugin.yml and config.yml, no server/API classes.
+
+AUTOMATED TESTS: PASS (4 tests, 0 failures)
+- All seven vanilla command aliases, bare/minecraft:/bukkit: forms.
+- Non-chat and third-party namespaced commands remain untouched; no redirect loop.
+- Console command case, missing arguments.
+- Selectors with spaces/quotes and preservation of message content.
+
+Maven dependency downloads were blocked by this environment's Java HTTP proxy
+configuration. The distributable was compiled using javac against downloaded
+real API jars and tested using JUnit Platform Console Standalone 1.11.4.
+The standard Maven project is included for normal development environments.
+
+NOT VERIFIED: live Paper server startup, Minecraft client delivery, other-plugin
+interactions. No end-to-end multiplayer session was available.
+
+1.0.1: whisper global-broadcast branch removed; existing config no longer affects whisper recipients. Recompiled and all four parser/routing tests rerun successfully. Live-client delivery remains unverified.
+
+1.0.2: whisper component now uses literal (W)[username] message, NamedTextColor.GRAY and TextDecoration.ITALIC. Recipient selection is unchanged. Successfully recompiled against the same Paper 26.2 API. Live client appearance unverified.
